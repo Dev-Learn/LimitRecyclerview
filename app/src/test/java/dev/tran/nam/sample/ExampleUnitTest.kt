@@ -1,4 +1,4 @@
-package dev.tran.nam.application
+package dev.tran.nam.sample
 
 import org.junit.Test
 

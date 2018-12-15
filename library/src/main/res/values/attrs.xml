@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="LimitRecyclerView">
+        <attr name="number_to_load" format="integer"/>
+        <attr name="limit" format="integer"/>
+    </declare-styleable>
+</resources>
