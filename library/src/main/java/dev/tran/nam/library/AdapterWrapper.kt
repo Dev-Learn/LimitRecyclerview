@@ -17,7 +17,7 @@ class AdapterWrapper(private val mAdapter: BaseAdapterLimit<Any>) :
 
     companion object {
         val TAG = AdapterWrapper::class.qualifiedName
-        private const val ITEM_LOADING = 1
+        private const val ITEM_LOADING = 3
     }
 
     init {
@@ -35,7 +35,7 @@ class AdapterWrapper(private val mAdapter: BaseAdapterLimit<Any>) :
     override var mLimit = 0
 
     override val isOver: Boolean
-        get() = mAdapter.itemCount == mLimit
+        get() = mAdapter.itemCount == mLimit || mAdapter.itemCount == mLimit + 1
 
     override var errorMessage: String? = null
 
@@ -58,7 +58,10 @@ class AdapterWrapper(private val mAdapter: BaseAdapterLimit<Any>) :
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         Log.d(TAG, "getItemViewType - onBindViewHolder : position : $position")
-        Log.d(TAG, "getItemViewType - onBindViewHolder : getItemViewType(position) == ITEM_LOADING : ${getItemViewType(position) == ITEM_LOADING}")
+        Log.d(
+            TAG,
+            "getItemViewType - onBindViewHolder : getItemViewType(position) == ITEM_LOADING : ${getItemViewType(position) == ITEM_LOADING}"
+        )
         if (position == NO_POSITION)
             return
         if (getItemViewType(position) == ITEM_LOADING) {
@@ -72,7 +75,7 @@ class AdapterWrapper(private val mAdapter: BaseAdapterLimit<Any>) :
 
     override fun getItemViewType(position: Int): Int {
         Log.d(TAG, "getItemViewType : position : $position")
-        Log.d(TAG,"getItemViewType : isLoading() : " + isLoading())
+        Log.d(TAG, "getItemViewType : isLoading() : " + isLoading())
         Log.d(TAG, "getItemViewType : itemCount : ${mAdapter.itemCount}")
         return if (isLoading() && (position == 0 || position == mAdapter.itemCount))
             ITEM_LOADING
@@ -101,7 +104,7 @@ class AdapterWrapper(private val mAdapter: BaseAdapterLimit<Any>) :
             }
             ERROR -> {
                 if (isAfter) {
-                    notifyItemChanged(itemCount)
+                    notifyItemChanged(itemCount - 1)
                 } else {
                     notifyItemChanged(0)
                 }
@@ -109,7 +112,7 @@ class AdapterWrapper(private val mAdapter: BaseAdapterLimit<Any>) :
 
             NONE -> {
                 if (isAfter) {
-                    notifyItemRemoved(itemCount)
+                    notifyItemRemoved(itemCount - 1)
                 } else {
                     notifyItemRemoved(0)
                 }
@@ -119,11 +122,11 @@ class AdapterWrapper(private val mAdapter: BaseAdapterLimit<Any>) :
     }
 
     fun getItemLasted(): Any? {
-        return if (mAdapter.itemCount > 0) mAdapter.items[mAdapter.itemCount - 1] else null
+        return if (mAdapter.itemCount > 0) mAdapter.getItem(mAdapter.itemCount - 1) else null
     }
 
     fun getItemFirst(): Any? {
-        return if (mAdapter.itemCount > 0) mAdapter.items[0] else null
+        return if (mAdapter.itemCount > 0) mAdapter.getItem(0) else null
     }
 
     private class LoadingViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -160,7 +163,7 @@ class AdapterWrapper(private val mAdapter: BaseAdapterLimit<Any>) :
                         tvError.text = it
                     }
 
-                    btRetry.setOnClickListener { it ->
+                    btRetry.setOnClickListener {
                         retry?.invoke()
                     }
                 }

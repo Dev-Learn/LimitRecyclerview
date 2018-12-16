@@ -89,7 +89,7 @@ class MainActivity : AppCompatActivity(), LimitRecyclerView.OnLoadListener<Any> 
                     if (response.isSuccessful) {
                         val result = response.body()
                         result?.let {
-                            adapter.add(data = result, isInitial = type == 0)
+                            adapter.updateData(data = result, isInitial = type == 0)
                         }
                     } else {
                         adapter.updateError("Error"){
