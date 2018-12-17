@@ -1,8 +1,6 @@
 package dev.tran.nam.sample
 
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,13 +16,15 @@ import retrofit2.http.Query
 
 class MainActivity : AppCompatActivity(), LimitRecyclerView.OnLoadListener<Any> {
 
-    lateinit var retrofit: Retrofit
+    private lateinit var retrofit: Retrofit
     lateinit var adapter: ArticleAdapter
+    private var position = -1
 
     private val rv: LimitRecyclerView by lazy {
         findViewById<LimitRecyclerView>(R.id.rv_item)
     }
 
+    @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -52,13 +52,26 @@ class MainActivity : AppCompatActivity(), LimitRecyclerView.OnLoadListener<Any> 
                 )
             )
             .build()
-        callApi(0)
+
+        if (savedInstanceState == null) {
+            callApi(0)
+        } else {
+            position = savedInstanceState.getInt("position", -1)
+            val data: ArrayList<ArticleModel>? = savedInstanceState.getParcelableArrayList("listArticle")
+            data?.let {
+                adapter.add(it,true)
+                if (position != -1){
+                    rv.layoutManager?.scrollToPosition(position)
+                    position = -1
+                }
+            }
+        }
     }
 
     override fun onLoadBefore(firstItem: Any?) {
         firstItem?.let {
             if (it is ArticleModel) {
-                callApi(1,idBefore = it.id)
+                callApi(1, idBefore = it.id)
             }
         }
     }
@@ -66,7 +79,7 @@ class MainActivity : AppCompatActivity(), LimitRecyclerView.OnLoadListener<Any> 
     override fun onLoadMore(lastItem: Any?) {
         lastItem?.let {
             if (it is ArticleModel) {
-                callApi(2,idAfter = it.id)
+                callApi(2, idAfter = it.id)
             }
         }
     }
@@ -80,7 +93,7 @@ class MainActivity : AppCompatActivity(), LimitRecyclerView.OnLoadListener<Any> 
         retrofit.create(ArticleAPI::class.java).getArticle(before = idBefore, after = idAfter, limit = limit)
             .enqueue(object : Callback<List<ArticleModel>> {
                 override fun onFailure(call: Call<List<ArticleModel>>, t: Throwable) {
-                    adapter.updateError(t.message){
+                    adapter.updateError(t.message) {
                         callApi(type, idBefore, idAfter)
                     }
                 }
@@ -92,12 +105,20 @@ class MainActivity : AppCompatActivity(), LimitRecyclerView.OnLoadListener<Any> 
                             adapter.updateData(data = result, isInitial = type == 0)
                         }
                     } else {
-                        adapter.updateError("Error"){
+                        adapter.updateError("Error") {
                             callApi(type, idBefore, idAfter)
                         }
                     }
                 }
             })
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+        outState?.putParcelableArrayList("listArticle", adapter.getData())
+        rv.layoutManager?.let {
+            outState?.putInt("position", (it as LinearLayoutManager).findFirstCompletelyVisibleItemPosition())
+        }
     }
 }
 

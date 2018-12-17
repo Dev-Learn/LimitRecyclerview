@@ -75,12 +75,14 @@ class ArticleAdapter : BaseAdapterLimit<ArticleModel>() {
         dataUpdate: MutableList<ArticleModel>,
         item: ArticleModel
     ) {
-        val date = item.day()
-        if (!listDay.contains(date)) {
-            dataUpdate.add(
-                ArticleModel.header(item.id, date)
-            )
-            listDay.add(date)
+        if (!item.isHeader){
+            val date = item.day()
+            if (!listDay.contains(date)) {
+                dataUpdate.add(
+                    ArticleModel.header(item.id, date)
+                )
+                listDay.add(date)
+            }
         }
     }
 

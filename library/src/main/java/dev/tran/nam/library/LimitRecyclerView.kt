@@ -3,8 +3,10 @@ package dev.tran.nam.library
 import android.content.Context
 import android.util.AttributeSet
 import android.util.Log
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 
 open class LimitRecyclerView : RecyclerView {
 
@@ -57,36 +59,73 @@ open class LimitRecyclerView : RecyclerView {
             val layoutManager = recyclerView.layoutManager
             layoutManager?.let { it ->
                 val totalItemCount = it.itemCount
-                if (it is LinearLayoutManager) {
-                    val lastVisibleItemPosition = it.findLastVisibleItemPosition()
-                    val firstVisibleItemPosition = it.findFirstVisibleItemPosition()
-                    Log.d(TAG, "lastVisibleItemPosition : $lastVisibleItemPosition")
-                    Log.d(TAG, "firstVisibleItemPosition : $firstVisibleItemPosition")
 
-
-                    val isOver = mAdapterWrapper?.isOver!!
-                    val loadingType = mAdapterWrapper?.mTypeLoading!!
-                    val isAfter = mAdapterWrapper?.isAfter!!
-                    val isBefore = mAdapterWrapper?.isBefore!!
-
-                    Log.d(TAG, "isOver: $isOver")
-                    Log.d(TAG, "mTypeLoading: $loadingType")
-                    Log.d(TAG, "isAfter: $isAfter")
-                    Log.d(TAG, "isBefore: $isBefore")
-
-                    if (loadingType == TypeLoading.NONE && totalItemCount <= lastVisibleItemPosition + mNumberToLoad && isAfter) {
-                        mAdapterWrapper?.mTypeLoad = TypeLoad.AFTER
-                        mAdapterWrapper?.updateLoading(TypeLoading.LOADING)
-                        onLoadListener?.onLoadMore((mAdapterWrapper?.getItemLasted()))
-
-                    } else if (loadingType == TypeLoading.NONE && firstVisibleItemPosition == mNumberToLoad && isBefore && isOver) {
-                        mAdapterWrapper?.mTypeLoad = TypeLoad.BEFORE
-                        mAdapterWrapper?.updateLoading(TypeLoading.LOADING)
-                        onLoadListener?.onLoadBefore(mAdapterWrapper?.getItemFirst())
+                val lastVisibleItemPosition = when (layoutManager) {
+                    is GridLayoutManager -> layoutManager.findLastVisibleItemPosition()
+                    is StaggeredGridLayoutManager -> {
+                        val into = IntArray(layoutManager.spanCount)
+                        layoutManager.findLastVisibleItemPositions(into)
+                        findMax(into)
                     }
+                    else -> (layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
+                }
+
+                val firstVisibleItemPosition = when (layoutManager) {
+                    is GridLayoutManager -> layoutManager.findFirstVisibleItemPosition()
+                    is StaggeredGridLayoutManager -> {
+                        val into = IntArray(layoutManager.spanCount)
+                        layoutManager.findFirstVisibleItemPositions(into)
+                        findMin(into)
+                    }
+                    else -> (layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                }
+
+                Log.d(TAG, "lastVisibleItemPosition : $lastVisibleItemPosition")
+                Log.d(TAG, "firstVisibleItemPosition : $firstVisibleItemPosition")
+
+                val isOver = mAdapterWrapper?.isOver!!
+                val loadingType = mAdapterWrapper?.mTypeLoading!!
+                val isAfter = mAdapterWrapper?.isAfter!!
+                val isBefore = mAdapterWrapper?.isBefore!!
+
+                Log.d(TAG, "isOver: $isOver")
+                Log.d(TAG, "mTypeLoading: $loadingType")
+                Log.d(TAG, "isAfter: $isAfter")
+                Log.d(TAG, "isBefore: $isBefore")
+
+                if (loadingType == TypeLoading.NONE && totalItemCount <= lastVisibleItemPosition + mNumberToLoad && isAfter) {
+                    mAdapterWrapper?.mTypeLoad = TypeLoad.AFTER
+                    mAdapterWrapper?.updateLoading(TypeLoading.LOADING)
+                    onLoadListener?.onLoadMore((mAdapterWrapper?.getItemLasted()))
+                    return
+                }
+
+                if (loadingType == TypeLoading.NONE && firstVisibleItemPosition == mNumberToLoad && isBefore && isOver) {
+                    mAdapterWrapper?.mTypeLoad = TypeLoad.BEFORE
+                    mAdapterWrapper?.updateLoading(TypeLoading.LOADING)
+                    onLoadListener?.onLoadBefore(mAdapterWrapper?.getItemFirst())
                 }
             }
         }
+    }
+
+    override fun setLayoutManager(layout: LayoutManager?) {
+        super.setLayoutManager(layout)
+        if (layout is GridLayoutManager) layout.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+            override fun getSpanSize(position: Int): Int {
+                return if (mAdapterWrapper != null && mAdapterWrapper!!.isLoadMoreView(position)) {
+                    layout.spanCount
+                } else 1
+            }
+        }
+    }
+
+    private fun findMax(lastPositions: IntArray): Int {
+        return lastPositions.max() ?: lastPositions[0]
+    }
+
+    private fun findMin(firstPositions: IntArray): Int {
+        return firstPositions.min() ?: firstPositions[0]
     }
 
     override fun onAttachedToWindow() {

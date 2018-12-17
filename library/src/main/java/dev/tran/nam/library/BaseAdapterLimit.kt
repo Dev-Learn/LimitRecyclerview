@@ -2,6 +2,7 @@ package dev.tran.nam.library
 
 import android.annotation.SuppressLint
 import android.os.AsyncTask
+import android.os.Parcelable
 import android.util.Log
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -43,8 +44,12 @@ abstract class BaseAdapterLimit<T> : RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     fun add(data: List<T>, isInitial: Boolean = false) {
+        val limit = iLimitAdapter.mLimit
         if (isInitial) {
             items.addAll(data)
+            if (iLimitAdapter.isOver){
+                iLimitAdapter.isBefore = true
+            }
             notifyDataSetChanged()
             return
         }
@@ -60,7 +65,7 @@ abstract class BaseAdapterLimit<T> : RecyclerView.Adapter<RecyclerView.ViewHolde
         }
 
         val dataUpdate = items.toMutableList()
-        val limit = iLimitAdapter.mLimit
+
         if (iLimitAdapter.mTypeLoad == AFTER) {
             data.forEachIndexed { _, item ->
                 addHeaderAfter(dataUpdate, item)
@@ -140,6 +145,10 @@ abstract class BaseAdapterLimit<T> : RecyclerView.Adapter<RecyclerView.ViewHolde
 
     fun setILimitAdapter(iLimitAdapter: ILimitAdapter) {
         this.iLimitAdapter = iLimitAdapter
+    }
+
+    fun getData() : ArrayList<T>{
+        return items
     }
 
     @SuppressLint("StaticFieldLeak")

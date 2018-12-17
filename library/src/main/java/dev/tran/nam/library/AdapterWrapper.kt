@@ -85,6 +85,10 @@ class AdapterWrapper(private val mAdapter: BaseAdapterLimit<Any>) :
             mAdapter.getItemViewType(position)
     }
 
+    fun isLoadMoreView(position: Int): Boolean {
+        return getItemViewType(position) == ITEM_LOADING
+    }
+
     private fun isLoading(): Boolean {
         return mTypeLoading == LOADING || mTypeLoading == ERROR
     }
