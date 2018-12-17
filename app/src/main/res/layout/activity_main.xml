@@ -12,6 +12,7 @@
             android:id="@+id/rv_item"
             app:layoutManager="dev.tran.nam.sample.LinearLayoutManagerWrapper"
             app:number_to_load="1"
-            app:limit="100"/>
+            app:limit="100"
+            app:isSupportLoadBefore="false"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

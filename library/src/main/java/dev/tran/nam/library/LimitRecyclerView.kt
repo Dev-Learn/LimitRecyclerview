@@ -16,6 +16,7 @@ open class LimitRecyclerView : RecyclerView {
 
     private var mNumberToLoad = NUMBER_TO_LOAD
     private var mLimit = LIMIT
+    private var isSupportLoadBefore = true
 
     private var mAdapterWrapper: AdapterWrapper? = null
     private var onLoadListener: OnLoadListener<Any>? = null
@@ -29,6 +30,7 @@ open class LimitRecyclerView : RecyclerView {
 
         mNumberToLoad = a.getInt(R.styleable.LimitRecyclerView_number_to_load, NUMBER_TO_LOAD)
         mLimit = a.getInt(R.styleable.LimitRecyclerView_limit, LIMIT)
+        isSupportLoadBefore = a.getBoolean(R.styleable.LimitRecyclerView_isSupportLoadBefore, true)
 
         a.recycle()
     }
@@ -43,6 +45,7 @@ open class LimitRecyclerView : RecyclerView {
         adapter?.let {
             mAdapterWrapper = AdapterWrapper(it as BaseAdapterLimit<Any>)
             mAdapterWrapper?.mLimit = mLimit
+            mAdapterWrapper?.isSupportLoadBefore = isSupportLoadBefore
             val dataObserver = DataObserver(mAdapterWrapper!!)
             super.setAdapter(mAdapterWrapper)
             it.registerDataObserver(dataObserver)

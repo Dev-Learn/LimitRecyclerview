@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity(), LimitRecyclerView.OnLoadListener<Any> 
         rv.setOnLoadListener(this)
 
         retrofit = Retrofit.Builder()
-            .baseUrl("http://192.168.1.84:5000/")
+            .baseUrl("http://192.168.5.253:5000/")
             .addConverterFactory(
                 GsonConverterFactory.create(
                     GsonBuilder()

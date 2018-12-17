@@ -34,7 +34,7 @@ abstract class BaseAdapterLimit<T> : RecyclerView.Adapter<RecyclerView.ViewHolde
         registerAdapterDataObserver(mAdapterObserver!!)
     }
 
-    fun unRegisterDataObserver() {
+    open fun unRegisterDataObserver() {
         if (mAdapterObserver != null) {
             unregisterAdapterDataObserver(mAdapterObserver!!)
         }
@@ -63,90 +63,57 @@ abstract class BaseAdapterLimit<T> : RecyclerView.Adapter<RecyclerView.ViewHolde
         val limit = iLimitAdapter.mLimit
         if (iLimitAdapter.mTypeLoad == AFTER) {
             data.forEachIndexed { _, item ->
-                // Header ------------------
-//                val date = item.headerValue
-//                if (!listDay.contains(date)) {
-//                    data.add(
-//                        convert(ArticleEntity.header(item.id, date))
-//                    )
-//                    listDay.add(date)
-//                }
-                addHeaderAter(dataUpdate, item)
-                // -------------------------
+                addHeaderAfter(dataUpdate, item)
                 dataUpdate.add(item)
             }
-            if (dataUpdate.size > limit) {
+            if (dataUpdate.size > limit && iLimitAdapter.isSupportLoadBefore) {
+                iLimitAdapter.isBefore = true
                 val surplus = dataUpdate.size - limit
                 val listItemRemove = ArrayList<T>()
                 for (i in 0 until surplus) {
                     dataUpdate[i].let {
-                        //                      if (it.isHeader) {
-//                          listDay.remove(it.headerValue)
-//                      }
                         removeKeyHeader(it)
                         listItemRemove.add(it)
                     }
                 }
                 dataUpdate.removeAll(listItemRemove)
-                iLimitAdapter.isBefore = true
+
+                addHeaderFirst(dataUpdate,dataUpdate[0])
             }
         } else {
-            // Header ------------------
-//                   val firstItem = data[0]
-//                   if (firstItem.isHeader) {
-//                       val firstItemListData = listData[listData.size - 1]
-//                       if (firstItem.headerValue == firstItemListData.headerValue) {
-//                           listDay.remove(firstItem.headerValue)
-//                           data.removeAt(0)
-//                       }
-//                   }
-            // -------------------------
-            removeHeader(getItem(0), data[data.size - 1],items)
+            removeHeader(getItem(0), data[data.size - 1],dataUpdate)
             var indexHeader = 0
             data.forEachIndexed { index, item ->
-                // Header ------------------
-//                   val date = item.headerValue
-//                   if (!listDay.contains(date)) {
-//                       data.add(
-//                           index + indexHeader,
-//                           convert(ArticleEntity.header(item.id, date))
-//                       )
-//                       indexHeader += 1
-//                       listDay.add(date)
-//                   }
                 indexHeader = addHeaderBefore(dataUpdate, index, item, indexHeader)
-                // -------------------------
                 dataUpdate.add(index + indexHeader, item)
             }
 
             if (dataUpdate.size > limit) {
+                iLimitAdapter.isAfter = true
                 val surplus = dataUpdate.size - limit
                 val size = dataUpdate.size - 1
                 val listItemRemove = ArrayList<T>()
                 for (i in size downTo size - surplus + 1) {
                     dataUpdate[i].let {
-                        //                      if (it.isHeader) {
-//                          listDay.remove(it.headerValue)
-//                      }
                         removeKeyHeader(it)
                         listItemRemove.add(it)
                     }
                 }
                 dataUpdate.removeAll(listItemRemove)
-                iLimitAdapter.isAfter = true
             }
         }
-
         iLimitAdapter.updateLoading(TypeLoading.SUCCESS)
         updateData(dataUpdate)
     }
 
     @Suppress("UNUSED_PARAMETER")
-    open fun removeHeader(firstItem: T, firstItemResponse: T, listItem: ArrayList<T>) {}
+    open fun addHeaderFirst(listData: MutableList<T>, item: T) {}
 
     @Suppress("UNUSED_PARAMETER")
-    open fun addHeaderAter(dataUpdate: MutableList<T>, item: T) {
-    }
+    open fun removeHeader(firstItem: T, firstItemResponse: T, listItem: MutableList<T>) {}
+
+    @Suppress("UNUSED_PARAMETER")
+    open fun addHeaderAfter(dataUpdate: MutableList<T>, item: T) {}
 
     @Suppress("UNUSED_PARAMETER")
     open fun addHeaderBefore(
@@ -159,8 +126,7 @@ abstract class BaseAdapterLimit<T> : RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     @Suppress("UNUSED_PARAMETER")
-    open fun removeKeyHeader(it: T) {
-    }
+    open fun removeKeyHeader(it: T) {}
 
     fun getItem(position: Int): T {
         return items[position]

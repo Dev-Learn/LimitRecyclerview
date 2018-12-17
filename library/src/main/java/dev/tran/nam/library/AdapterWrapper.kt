@@ -24,6 +24,10 @@ class AdapterWrapper(private val mAdapter: BaseAdapterLimit<Any>) :
         mAdapter.setILimitAdapter(this)
     }
 
+    override var mLimit = 0
+
+    override var isSupportLoadBefore: Boolean = true
+
     override var mTypeLoad: TypeLoad = AFTER
 
     override var mTypeLoading: TypeLoading = NONE
@@ -32,10 +36,8 @@ class AdapterWrapper(private val mAdapter: BaseAdapterLimit<Any>) :
 
     override var isAfter: Boolean = true
 
-    override var mLimit = 0
-
     override val isOver: Boolean
-        get() = mAdapter.itemCount == mLimit || mAdapter.itemCount == mLimit + 1
+        get() = isSupportLoadBefore && mAdapter.itemCount == mLimit || mAdapter.itemCount == mLimit + 1
 
     override var errorMessage: String? = null
 
@@ -91,19 +93,19 @@ class AdapterWrapper(private val mAdapter: BaseAdapterLimit<Any>) :
         mTypeLoading = type
         when (mTypeLoading) {
             LOADING -> {
-                if (isAfter) {
+                if (mTypeLoad == AFTER) {
                     notifyItemInserted(itemCount)
                 } else {
                     notifyItemInserted(0)
                 }
             }
             SUCCESS -> {
-                if (!isAfter) {
+                if (mTypeLoad != AFTER) {
                     notifyItemRemoved(0)
                 }
             }
             ERROR -> {
-                if (isAfter) {
+                if (mTypeLoad == AFTER) {
                     notifyItemChanged(itemCount - 1)
                 } else {
                     notifyItemChanged(0)
@@ -111,7 +113,7 @@ class AdapterWrapper(private val mAdapter: BaseAdapterLimit<Any>) :
             }
 
             NONE -> {
-                if (isAfter) {
+                if (mTypeLoad == AFTER) {
                     notifyItemRemoved(itemCount - 1)
                 } else {
                     notifyItemRemoved(0)

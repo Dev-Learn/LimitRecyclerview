@@ -1,5 +1,6 @@
 package dev.tran.nam.sample
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -34,14 +35,16 @@ class ArticleAdapter : BaseAdapterLimit<ArticleModel>() {
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val item = getItem(position)
-        if (item.isHeader){
-            if (holder is HeaderViewHolder) {
-                holder.bind(getItem(position).headerValue)
+        when (getItemViewType(position)) {
+            HEADER -> {
+                if (holder is HeaderViewHolder) {
+                    holder.bind(getItem(position - additional()).headerValue)
+                }
             }
-        }else{
-            if (holder is ArticleViewHolder)
-                holder.bind(getItem(position))
+            else -> {
+                if (holder is ArticleViewHolder)
+                    holder.bind(getItem(position))
+            }
         }
     }
 
@@ -68,7 +71,7 @@ class ArticleAdapter : BaseAdapterLimit<ArticleModel>() {
         }
     }
 
-    override fun addHeaderAter(
+    override fun addHeaderAfter(
         dataUpdate: MutableList<ArticleModel>,
         item: ArticleModel
     ) {
@@ -78,6 +81,25 @@ class ArticleAdapter : BaseAdapterLimit<ArticleModel>() {
                 ArticleModel.header(item.id, date)
             )
             listDay.add(date)
+        }
+    }
+
+    override fun addHeaderFirst(listData: MutableList<ArticleModel>, item: ArticleModel) {
+        item.let {
+            Log.d("ArticleAdapter", "addHeaderFirst - isHeader : " + it.isHeader)
+            if (!it.isHeader) {
+                val date = it.day()
+                Log.d("ArticleAdapter", "addHeaderFirst - date : " + date)
+                if (!listDay.contains(date)) {
+                    listData.add(
+                        0,
+                        ArticleModel.header(item.id, date)
+                    )
+
+                    Log.d("ArticleAdapter", "addHeaderFirst - Insert")
+                    listDay.add(date)
+                }
+            }
         }
     }
 
@@ -103,13 +125,16 @@ class ArticleAdapter : BaseAdapterLimit<ArticleModel>() {
     override fun removeHeader(
         firstItem: ArticleModel,
         firstItemResponse: ArticleModel,
-        listItem: ArrayList<ArticleModel>
+        listItem: MutableList<ArticleModel>
     ) {
+        Log.d("ArticleAdapter", "removeHeader - firstItem.isHeader" + firstItem.isHeader)
         if (firstItem.isHeader) {
+            Log.d("ArticleAdapter", "removeHeader - firstItem.headerValue : " + firstItem.headerValue)
             firstItem.headerValue?.let {
+                Log.d("ArticleAdapter", "removeHeader - firstItemResponse.day() : " + firstItemResponse.day())
                 if (it == firstItemResponse.day()) {
                     listDay.remove(it)
-                    listItem.removeAt(0)
+                    listItem.remove(firstItem)
                 }
             }
         }
@@ -128,6 +153,7 @@ class ArticleAdapter : BaseAdapterLimit<ArticleModel>() {
         }
 
         fun bind(day: String?) {
+            Log.d("HeaderViewHolder", "Header " + "${day}")
             date.text = day
         }
     }

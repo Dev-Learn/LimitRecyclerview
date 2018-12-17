@@ -3,5 +3,6 @@
     <declare-styleable name="LimitRecyclerView">
         <attr name="number_to_load" format="integer"/>
         <attr name="limit" format="integer"/>
+        <attr name="isSupportLoadBefore" format="boolean"/>
     </declare-styleable>
 </resources>
