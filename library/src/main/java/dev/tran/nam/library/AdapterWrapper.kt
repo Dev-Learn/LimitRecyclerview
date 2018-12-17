@@ -11,6 +11,9 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import dev.tran.nam.library.TypeLoad.AFTER
 import dev.tran.nam.library.TypeLoading.*
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
+
+
 
 class AdapterWrapper(private val mAdapter: BaseAdapterLimit<Any>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>(), ILimitAdapter {
@@ -23,6 +26,8 @@ class AdapterWrapper(private val mAdapter: BaseAdapterLimit<Any>) :
     init {
         mAdapter.setILimitAdapter(this)
     }
+
+    private var onAdapterWrapperListener : OnAdapterWrapperListener? = null
 
     override var mLimit = 0
 
@@ -42,6 +47,9 @@ class AdapterWrapper(private val mAdapter: BaseAdapterLimit<Any>) :
     override var errorMessage: String? = null
 
     override var retry: (() -> Unit)? = null
+
+    override val isStaggeredGridLayoutManager: Boolean
+        get() = onAdapterWrapperListener?.isStaggeredGridLayoutManager ?: false
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         if (viewType == ITEM_LOADING) {
@@ -68,6 +76,10 @@ class AdapterWrapper(private val mAdapter: BaseAdapterLimit<Any>) :
             return
         if (getItemViewType(position) == ITEM_LOADING) {
             if (holder is LoadingViewHolder) {
+                if (isStaggeredGridLayoutManager){
+                    val layoutParams = holder.itemView.layoutParams as StaggeredGridLayoutManager.LayoutParams
+                    layoutParams.isFullSpan = true
+                }
                 holder.bind(mTypeLoading, errorMessage, retry)
             }
         } else {
@@ -85,8 +97,12 @@ class AdapterWrapper(private val mAdapter: BaseAdapterLimit<Any>) :
             mAdapter.getItemViewType(position)
     }
 
-    fun isLoadMoreView(position: Int): Boolean {
-        return getItemViewType(position) == ITEM_LOADING
+    fun setOnAdapterWrapperListener(onAdapterWrapperListener : OnAdapterWrapperListener){
+        this.onAdapterWrapperListener = onAdapterWrapperListener
+    }
+
+    fun isTotality(position: Int): Boolean {
+        return getItemViewType(position) == ITEM_LOADING || mAdapter.checkTotality(position)
     }
 
     private fun isLoading(): Boolean {
@@ -175,6 +191,10 @@ class AdapterWrapper(private val mAdapter: BaseAdapterLimit<Any>) :
                 }
             }
         }
+    }
+
+    interface OnAdapterWrapperListener{
+        val isStaggeredGridLayoutManager : Boolean
     }
 
 }

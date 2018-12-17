@@ -11,4 +11,5 @@ interface ILimitAdapter {
     fun updateLoading(type : TypeLoading)
     var errorMessage : String?
     var retry: (() -> Unit)?
+    val isStaggeredGridLayoutManager : Boolean
 }

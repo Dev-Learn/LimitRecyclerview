@@ -3,7 +3,9 @@ package dev.tran.nam.sample
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.google.gson.GsonBuilder
 import dev.tran.nam.library.LimitRecyclerView
 import retrofit2.Call
@@ -29,12 +31,12 @@ class MainActivity : AppCompatActivity(), LimitRecyclerView.OnLoadListener<Any> 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        rv.addItemDecoration(
-            DividerItemDecoration(
-                this,
-                LinearLayoutManager.VERTICAL
-            )
-        )
+//        rv.addItemDecoration(
+//            DividerItemDecoration(
+//                this,
+//                LinearLayoutManager.VERTICAL
+//            )
+//        )
 
         adapter = ArticleAdapter()
 
@@ -43,7 +45,7 @@ class MainActivity : AppCompatActivity(), LimitRecyclerView.OnLoadListener<Any> 
         rv.setOnLoadListener(this)
 
         retrofit = Retrofit.Builder()
-            .baseUrl("http://192.168.5.253:5000/")
+            .baseUrl("http://192.168.1.84:5000/")
             .addConverterFactory(
                 GsonConverterFactory.create(
                     GsonBuilder()
@@ -116,8 +118,16 @@ class MainActivity : AppCompatActivity(), LimitRecyclerView.OnLoadListener<Any> 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
         outState?.putParcelableArrayList("listArticle", adapter.getData())
-        rv.layoutManager?.let {
-            outState?.putInt("position", (it as LinearLayoutManager).findFirstCompletelyVisibleItemPosition())
+        val layoutManager = rv.layoutManager
+        layoutManager?.let {
+            val position : Int = when (layoutManager) {
+                is GridLayoutManager -> layoutManager.findFirstCompletelyVisibleItemPosition()
+                is StaggeredGridLayoutManager -> {
+                    layoutManager.findFirstVisibleItemPositions(null)[0]
+                }
+                else -> (layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
+            }
+            outState?.putInt("position", position)
         }
     }
 }

@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 
-open class LimitRecyclerView : RecyclerView {
+open class LimitRecyclerView : RecyclerView, AdapterWrapper.OnAdapterWrapperListener {
 
     companion object {
         val TAG = LimitRecyclerView::class.qualifiedName
@@ -37,6 +37,9 @@ open class LimitRecyclerView : RecyclerView {
         a.recycle()
     }
 
+    override val isStaggeredGridLayoutManager: Boolean
+        get() = layoutManager is StaggeredGridLayoutManager
+
     @Suppress("unused")
     fun setOnLoadListener(onLoadListener: OnLoadListener<Any>) {
         this.onLoadListener = onLoadListener
@@ -48,6 +51,7 @@ open class LimitRecyclerView : RecyclerView {
             mAdapterWrapper = AdapterWrapper(it as BaseAdapterLimit<Any>)
             mAdapterWrapper?.mLimit = mLimit
             mAdapterWrapper?.isSupportLoadBefore = isSupportLoadBefore
+            mAdapterWrapper?.setOnAdapterWrapperListener(this)
             val dataObserver = DataObserver(mAdapterWrapper!!)
             super.setAdapter(mAdapterWrapper)
             it.registerDataObserver(dataObserver)
@@ -113,7 +117,7 @@ open class LimitRecyclerView : RecyclerView {
         super.setLayoutManager(layout)
         if (layout is GridLayoutManager) layout.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
-                return if (mAdapterWrapper != null && mAdapterWrapper!!.isLoadMoreView(position)) {
+                return if (mAdapterWrapper != null && mAdapterWrapper!!.isTotality(position)) {
                     layout.spanCount
                 } else 1
             }

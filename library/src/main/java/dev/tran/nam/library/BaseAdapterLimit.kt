@@ -8,6 +8,9 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import dev.tran.nam.library.TypeLoad.AFTER
 import dev.tran.nam.library.TypeLoad.BEFORE
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
+
+
 
 abstract class BaseAdapterLimit<T> : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -111,6 +114,13 @@ abstract class BaseAdapterLimit<T> : RecyclerView.Adapter<RecyclerView.ViewHolde
         updateData(dataUpdate)
     }
 
+    open fun setStaggeredGridLayout(holder : RecyclerView.ViewHolder){
+        if (iLimitAdapter.isStaggeredGridLayoutManager){
+            val layoutParams = holder.itemView.layoutParams as StaggeredGridLayoutManager.LayoutParams
+            layoutParams.isFullSpan = true
+        }
+    }
+
     @Suppress("UNUSED_PARAMETER")
     open fun addHeaderFirst(listData: MutableList<T>, item: T) {}
 
@@ -189,5 +199,7 @@ abstract class BaseAdapterLimit<T> : RecyclerView.Adapter<RecyclerView.ViewHolde
         }.execute()
     }
 
-
+    open fun checkTotality(position: Int): Boolean {
+        return true
+    }
 }

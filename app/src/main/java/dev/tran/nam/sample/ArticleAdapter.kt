@@ -9,6 +9,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import dev.tran.nam.library.BaseAdapterLimit
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
+
+
 
 class ArticleAdapter : BaseAdapterLimit<ArticleModel>() {
 
@@ -38,6 +41,7 @@ class ArticleAdapter : BaseAdapterLimit<ArticleModel>() {
         when (getItemViewType(position)) {
             HEADER -> {
                 if (holder is HeaderViewHolder) {
+                    setStaggeredGridLayout(holder)
                     holder.bind(getItem(position - additional()).headerValue)
                 }
             }
@@ -91,7 +95,7 @@ class ArticleAdapter : BaseAdapterLimit<ArticleModel>() {
             Log.d("ArticleAdapter", "addHeaderFirst - isHeader : " + it.isHeader)
             if (!it.isHeader) {
                 val date = it.day()
-                Log.d("ArticleAdapter", "addHeaderFirst - date : " + date)
+                Log.d("ArticleAdapter", "addHeaderFirst - date : $date")
                 if (!listDay.contains(date)) {
                     listData.add(
                         0,
@@ -148,6 +152,10 @@ class ArticleAdapter : BaseAdapterLimit<ArticleModel>() {
         }
     }
 
+    override fun checkTotality(position: Int): Boolean {
+        return getItem(position - additional()).isHeader
+    }
+
     class HeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         private val date: TextView by lazy {
@@ -155,7 +163,7 @@ class ArticleAdapter : BaseAdapterLimit<ArticleModel>() {
         }
 
         fun bind(day: String?) {
-            Log.d("HeaderViewHolder", "Header " + "${day}")
+            Log.d("HeaderViewHolder", "Header $day")
             date.text = day
         }
     }
