@@ -31,12 +31,12 @@ class MainActivity : AppCompatActivity(), LimitRecyclerView.OnLoadListener<Any> 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-//        rv.addItemDecoration(
-//            DividerItemDecoration(
-//                this,
-//                LinearLayoutManager.VERTICAL
-//            )
-//        )
+        rv.addItemDecoration(
+            DividerItemDecoration(
+                this,
+                LinearLayoutManager.VERTICAL
+            )
+        )
 
         adapter = ArticleAdapter()
 
@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity(), LimitRecyclerView.OnLoadListener<Any> 
         rv.setOnLoadListener(this)
 
         retrofit = Retrofit.Builder()
-            .baseUrl("http://192.168.1.84:5000/")
+            .baseUrl("http://192.168.7.152:5000/")
             .addConverterFactory(
                 GsonConverterFactory.create(
                     GsonBuilder()

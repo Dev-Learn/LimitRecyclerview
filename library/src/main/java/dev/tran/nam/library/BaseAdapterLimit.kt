@@ -2,14 +2,12 @@ package dev.tran.nam.library
 
 import android.annotation.SuppressLint
 import android.os.AsyncTask
-import android.os.Parcelable
 import android.util.Log
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import dev.tran.nam.library.TypeLoad.AFTER
 import dev.tran.nam.library.TypeLoad.BEFORE
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
-
 
 
 abstract class BaseAdapterLimit<T> : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -50,7 +48,7 @@ abstract class BaseAdapterLimit<T> : RecyclerView.Adapter<RecyclerView.ViewHolde
         val limit = iLimitAdapter.mLimit
         if (isInitial) {
             items.addAll(data)
-            if (iLimitAdapter.isOver){
+            if (iLimitAdapter.isOver) {
                 iLimitAdapter.isBefore = true
             }
             notifyDataSetChanged()
@@ -86,10 +84,10 @@ abstract class BaseAdapterLimit<T> : RecyclerView.Adapter<RecyclerView.ViewHolde
                 }
                 dataUpdate.removeAll(listItemRemove)
 
-                addHeaderFirst(dataUpdate,dataUpdate[0])
+                addHeaderFirst(dataUpdate, dataUpdate[0])
             }
         } else {
-            removeHeader(getItem(0), data[data.size - 1],dataUpdate)
+            removeHeader(getItem(0), data[data.size - 1], dataUpdate)
             var indexHeader = 0
             data.forEachIndexed { index, item ->
                 indexHeader = addHeaderBefore(dataUpdate, index, item, indexHeader)
@@ -114,21 +112,24 @@ abstract class BaseAdapterLimit<T> : RecyclerView.Adapter<RecyclerView.ViewHolde
         updateData(dataUpdate)
     }
 
-    open fun setStaggeredGridLayout(holder : RecyclerView.ViewHolder){
-        if (iLimitAdapter.isStaggeredGridLayoutManager){
+    open fun setStaggeredGridLayout(holder: RecyclerView.ViewHolder) {
+        if (iLimitAdapter.isStaggeredGridLayoutManager) {
             val layoutParams = holder.itemView.layoutParams as StaggeredGridLayoutManager.LayoutParams
             layoutParams.isFullSpan = true
         }
     }
 
     @Suppress("UNUSED_PARAMETER")
-    open fun addHeaderFirst(listData: MutableList<T>, item: T) {}
+    open fun addHeaderFirst(listData: MutableList<T>, item: T) {
+    }
 
     @Suppress("UNUSED_PARAMETER")
-    open fun removeHeader(firstItem: T, firstItemResponse: T, listItem: MutableList<T>) {}
+    open fun removeHeader(firstItem: T, firstItemResponse: T, listItem: MutableList<T>) {
+    }
 
     @Suppress("UNUSED_PARAMETER")
-    open fun addHeaderAfter(dataUpdate: MutableList<T>, item: T) {}
+    open fun addHeaderAfter(dataUpdate: MutableList<T>, item: T) {
+    }
 
     @Suppress("UNUSED_PARAMETER")
     open fun addHeaderBefore(
@@ -141,7 +142,8 @@ abstract class BaseAdapterLimit<T> : RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     @Suppress("UNUSED_PARAMETER")
-    open fun removeKeyHeader(it: T) {}
+    open fun removeKeyHeader(it: T) {
+    }
 
     fun getItem(position: Int): T {
         return items[position]
@@ -157,12 +159,12 @@ abstract class BaseAdapterLimit<T> : RecyclerView.Adapter<RecyclerView.ViewHolde
         this.iLimitAdapter = iLimitAdapter
     }
 
-    fun getData() : ArrayList<T>{
+    fun getData(): ArrayList<T> {
         return items
     }
 
     @SuppressLint("StaticFieldLeak")
-    private fun updateData(update: List<T>) {
+    open fun updateData(update: List<T>) {
         val oldItems = items
         Log.d(AdapterWrapper.TAG, "Debug DiffUtil : items - " + items.size)
         object : AsyncTask<Void, Void, DiffUtil.DiffResult>() {

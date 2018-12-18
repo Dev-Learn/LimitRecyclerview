@@ -120,7 +120,9 @@ class AdapterWrapper(private val mAdapter: BaseAdapterLimit<Any>) :
                 }
             }
             SUCCESS -> {
-                if (mTypeLoad != AFTER) {
+                if (mTypeLoad == AFTER) {
+                    notifyItemRemoved(itemCount)
+                }else{
                     notifyItemRemoved(0)
                 }
             }
